@@ -17,6 +17,7 @@ public class InOut : MonoBehaviour
         LocalMove,
         LocalScale,
         LocalRotate,
+        Color,
         None,
     }
     [Header("動畫模式")]
@@ -35,6 +36,10 @@ public class InOut : MonoBehaviour
     [Header("起始數值")]
     [Tooltip("依照各動畫模式代表其物件的起始變數為這數值")]
     public Vector3 Begin;
+
+    [Header("起始顏色")]
+    [Tooltip("動畫模式為Color時其物件的起始顏色為這顏色")]
+    public Color BeginColor;
 
     [Header("曲線模式")]
     [Tooltip("決定這物體的緩入緩出曲線")]
@@ -90,12 +95,17 @@ public class InOut : MonoBehaviour
     Vector3 Now_sca;//目前大小
     Vector3 Now_pos;//目前位置
     Vector3 Now_rot;//目前角度
+    Color Now_col;//目前顏色
     bool BackIng = false;//確保BackIn後還可以Back
     void Awake()//定義目前狀態
     {
         Now_pos = transform.localPosition;
         Now_rot = transform.localEulerAngles;
         Now_sca = transform.localScale;
+        if (GetComponent<Image>() != null)
+            Now_col = GetComponent<Image>().color;
+        if (GetComponent<SpriteRenderer>() != null)
+            Now_col = GetComponent<SpriteRenderer>().color;
     }
     void OnEnable()//當他被打開時觸發
     {
@@ -115,6 +125,13 @@ public class InOut : MonoBehaviour
                         transform.localEulerAngles = Begin;
                     if (TheAnime == Type.LocalScale)
                         transform.localScale = Begin;
+                    if (TheAnime == Type.Color)
+                    {
+                        if (GetComponent<Image>() != null)
+                            GetComponent<Image>().color = BeginColor;
+                        if (GetComponent<SpriteRenderer>() != null)
+                            GetComponent<SpriteRenderer>().color = BeginColor;
+                    }
                 }
                 else
                 {
@@ -124,6 +141,13 @@ public class InOut : MonoBehaviour
                         transform.localEulerAngles = Begin + Now_rot;
                     if (TheAnime == Type.LocalScale)
                         transform.localScale = Begin + Now_sca;
+                    if (TheAnime == Type.Color)
+                    {
+                        if (GetComponent<Image>() != null)
+                            GetComponent<Image>().color = BeginColor + Now_col;
+                        if (GetComponent<SpriteRenderer>() != null)
+                            GetComponent<SpriteRenderer>().color = BeginColor + Now_col;
+                    }
                 }
 
                 Invoke("Anime", TheExtra.Delay_time);
@@ -138,6 +162,13 @@ public class InOut : MonoBehaviour
                         transform.localEulerAngles = Now_rot;
                     if (TheAnime == Type.LocalScale)
                         transform.localScale = Now_sca;
+                    if (TheAnime == Type.Color)
+                    {
+                        if (GetComponent<Image>() != null)
+                            GetComponent<Image>().color = Now_col;
+                        if (GetComponent<SpriteRenderer>() != null)
+                            GetComponent<SpriteRenderer>().color = Now_col;
+                    }
                 }
                 else
                 {
@@ -147,6 +178,13 @@ public class InOut : MonoBehaviour
                         transform.localEulerAngles = Now_rot + Begin;
                     if (TheAnime == Type.LocalScale)
                         transform.localScale = Now_sca + Begin;
+                    if (TheAnime == Type.Color)
+                    {
+                        if (GetComponent<Image>() != null)
+                            GetComponent<Image>().color = BeginColor + Now_col;
+                        if (GetComponent<SpriteRenderer>() != null)
+                            GetComponent<SpriteRenderer>().color = BeginColor + Now_col;
+                    }
                 }
                 BackIng = true;
                 Invoke("Back", TheExtra.Delay_time);
@@ -178,6 +216,13 @@ public class InOut : MonoBehaviour
         if (TheAnime == Type.LocalScale)
         {
             ani.Join(transform.DOScale(Now_sca, Time));
+        }
+        if (TheAnime == Type.Color)
+        {
+            if (GetComponent<Image>() != null)
+                ani.Join(GetComponent<Image>().DOColor(Now_col, Time));
+            if (GetComponent<SpriteRenderer>() != null)
+                ani.Join(GetComponent<Image>().DOColor(Now_col, Time));
         }
 
         ani.Restart();
@@ -213,6 +258,26 @@ public class InOut : MonoBehaviour
                 ani.Join(transform.DOScale(Begin, TheExtra.BackTime));
             else
                 ani.Join(transform.DOScale(Begin + Now_sca, TheExtra.BackTime));
+        }
+        if (TheAnime == Type.Color)
+        {
+            if (GetComponent<Image>() != null)
+            {
+                GetComponent<Image>().color = Now_col;
+                if (TheBegin == Type2.Absolute)
+                    ani.Join(GetComponent<Image>().DOColor(BeginColor, TheExtra.BackTime));
+                else
+                    ani.Join(GetComponent<Image>().DOColor(BeginColor + Now_col, TheExtra.BackTime));
+            }
+            if (GetComponent<SpriteRenderer>() != null)
+            {
+                GetComponent<SpriteRenderer>().color = Now_col;
+                if (TheBegin == Type2.Absolute)
+                    ani.Join(GetComponent<SpriteRenderer>().DOColor(BeginColor, TheExtra.BackTime));
+                else
+                    ani.Join(GetComponent<SpriteRenderer>().DOColor(BeginColor + Now_col, TheExtra.BackTime));
+            }
+
         }
 
         ani.Restart();
